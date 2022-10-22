@@ -19,15 +19,15 @@ if (isset($_SESSION['errors'])) {
 $refill = $_SESSION['refill'] ?? array();
 
 ?>
-<aside class="col-sm-3 aside py-3 pe-5">
-    <div class="container-sm bg-white p-3">
+<aside class="col-md aside py-3">
+    <div class="bg-white p-3">
         <form action="search.php" method="get">
             <h4>Cerca:</h4>
             <input class="form-control mb-2" type="text" name="s" id="searchinput">
             <input class="btn btn-primary mb-2" type="submit" value="Cercar">
         </form>
     </div>
-    <div class="container-sm bg-white mt-4 p-3">
+    <div class="bg-white mt-4 p-3">
         <form action="login.php" method="post">
             <h4>Identifica't:</h4>
             <div class="mb-3 mt-3">
@@ -41,7 +41,7 @@ $refill = $_SESSION['refill'] ?? array();
             <input class="btn btn-primary mb-2" type="submit" value="Iniciar sessió">
         </form>
     </div>
-    <div class="container-sm bg-white mt-4 p-3">
+    <div class="bg-white mt-4 p-3">
         <form action="functional/register.php" method="post">
             <h4>Regista't:</h4>
             <?php if(isset($errors['registerStatus'])){
