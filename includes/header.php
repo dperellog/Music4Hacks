@@ -22,9 +22,13 @@ if (!isset($_SESSION)) {
     <title><?= getPageName(); ?></title>
 </head>
 <body>
-    <header class="container-fluid py-4 text-bg-dark text-center">
-        <div class="container-fluid slogan">
+    <div class="container-fluid">
+    <header class="row py-4 text-bg-dark text-center">
+        <div class="col align-items-center slogan">
             <h1>Music4Hacks</h1>
+        </div>
+        <div class="w-100"></div>
+        <div class="col align-items-center">
             <h2 class="small">El blog que mostra com hackejar la música.</h2>
         </div>
         <nav class="navbar navbar-expand-sm navbar-dark">

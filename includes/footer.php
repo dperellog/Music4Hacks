@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 
 ?>
-
+</div>
 <script src="assets/js/bootstrap.js"></script>
 </body>
 </html>

@@ -19,7 +19,7 @@ if (isset($_SESSION['errors'])) {
 $refill = $_SESSION['refill'] ?? array();
 
 ?>
-<aside class="col-md aside py-3">
+<aside class="col-md me-4 py-3 aside">
     <div class="bg-white p-3">
         <form action="search.php" method="get">
             <h4>Cerca:</h4>
