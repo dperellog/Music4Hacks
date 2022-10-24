@@ -9,7 +9,7 @@ include_once 'includes/header.php';
 
 ?>
 <div class="row mt-4">
-    <div class="col-sm-9 main-content"></div>
+    <div class="col-sm-9 main-content"><?php var_dump($_SESSION)?></div>
     <?php include 'includes/sidebar.php' ?>
 </div>
 

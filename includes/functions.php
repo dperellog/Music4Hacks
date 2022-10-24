@@ -17,49 +17,70 @@ function sanitStr($str) : string {
     return $str;
 }
 
-function registerUser($usuari){
-    
-    if(isset($conn)){
-        global $conn;
-    }else{
-        require 'connect.php';
+function validateData($inputData, $form) : array {
+    $results = array();
+    $errors = array();
+    $refill = array();
+
+    //Funcions per validar els inputs:
+    require_once '../functional/regexp.php';
+
+    $regExp = $regExp[$form]; 
+    //Descarregar resultats i neteja:
+    foreach ($inputData as $dada => $valor) {
+        if (is_string($dada)){
+            $results[sanitStr($dada)] = sanitStr($valor);
+        }
     }
 
-    if (userExists($usuari['email'])) {
-        return false;
-    }else{
-    //Preparar la consulta:
-    $qry = 'INSERT INTO usuaris (nom,cognom,email,`password`,`data`) VALUES (?,?,?,?,?)';
-    $consulta = mysqli_prepare($conn, $qry);
+    //Comprovar que hi ha informació de tots els inputs:
+        foreach (array_keys($regExp) as $clau) {
+            if (!in_array($clau, array_keys($inputData))) {
+                $errors[$clau] = true;
+            }
+        }
 
-    //Executar la consulta:
-    $usuari['date'] = date("Y-m-d");
-    mysqli_stmt_bind_param($consulta,'sssss',$usuari['name'], $usuari['surname'], $usuari['email'], $usuari['passwd'], $usuari['date']);
-    mysqli_stmt_execute($consulta);
-    mysqli_close($conn);
-    
-    return mysqli_stmt_get_result($consulta) == '';
+    //Comprovar que tots els inputs són correctes:
+    foreach ($inputData as $camp => $valor) {
+        if (in_array($camp, array_keys($regExp)) && !$regExp[$camp]($valor)) {
+        $errors[$camp] = true;
+        }else{
+            if (!in_array($valor, array('passwd'))){
+                $refill[$camp] = $valor;
+            }
+            if ($camp == 'passwd'){
+                $results['passwd'] = password_hash($results['passwd'], PASSWORD_BCRYPT, ['cost'=>4]);
+            }
+        }
     }
+
+    return array('data' => $results, 'errors' => $errors, 'refill' => $refill);
 }
 
-function userExists($userEmail){
+
+function userExists($userEmail) : bool{
     if(isset($conn)){
         global $conn;
     }else{
         require 'connect.php';
     }
 
+    $userEmail = 'dperellog@gmail.com';
 
     //Preparar consulta dels usuaris
     $qry = 'SELECT * FROM usuaris WHERE email = ?';
-    $consulta = mysqli_prepare($conn, $qry);
+    $consulta = $conn->prepare($qry);
 
     //Fer consulta:
-    mysqli_stmt_bind_param($consulta,'s',$userEmail);
-    mysqli_stmt_execute($consulta);
-    $result = (mysqli_stmt_get_result($consulta));
-    mysqli_close($conn);
+    $consulta->bind_param('s',$userEmail);
+    $consulta->execute();
+    $result = $consulta->get_result();
+    $conn->close();
 
     //Resultat:
     return $result->num_rows != 0;
+}
+
+function isLogged() : bool {
+    return isset($_SESSION['userData']['id']);
 }

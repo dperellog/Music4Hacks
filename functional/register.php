@@ -2,66 +2,55 @@
 // Fitxer per registrar un nou usuari.
 declare(strict_types=1);
 
+//Start Session.
 if (!isset($_SESSION)) {
     session_start();
 }
 
-require_once '../includes/functions.php';
-
+//If accessed directly.
 if (!isset($_POST['registerUser'])) {
     header("Location: ../index.php");
 }
 
-//Funcions per validar els inputs:
-$regExp = [
-    'name' => function($v){ 
-        return preg_match("/^[a-zA-Z ]*$/",$v);},
-    'surname' => function($v){ 
-        return preg_match("/^[a-zA-Z ]*$/",$v);},
-    'email' => function($v){
-        $v = filter_var($v, FILTER_SANITIZE_EMAIL); 
-        return filter_var($v, FILTER_VALIDATE_EMAIL);},
-    'passwd' => function($v){
-        return preg_match("/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^\w\s]).{8,}$/",$v) ;}
-];
 
+require_once '../includes/functions.php';
 
-//Descarregar resultats i neteja:
-$resultats = [];
-foreach ($_POST as $dada => $valor) {
-    if (is_string($dada)){
-        $resultats[sanitStr($dada)] = sanitStr($valor);
-    }
-}
+//Validate Data:
+unset($_POST['registerUser']);
+$registerData = validateData($_POST, 'registerUser');
 
-$_SESSION['errors'] = array();
+//Volcar errors i refills:
+$_SESSION['errors'] = $registerData['errors'];
+$_SESSION['refill'] = $registerData['refill'];
+$userData = $registerData['data'];
 
-//Comprovar que hi ha informació de tots els inputs:
-    foreach (array_keys($regExp) as $clau) {
-        if (!in_array($clau, array_keys($resultats))) {
-            $_SESSION['errors'][$clau] = true;
-        }
-    }
-
-//Comprovar que tots els inputs són correctes:
-foreach ($resultats as $camp => $valor) {
-    if (in_array($camp, array_keys($regExp)) && !$regExp[$camp]($valor) || empty($valor)) {
-       $_SESSION['errors'][$camp] = true;
-    }else{
-        if (!in_array($valor, array('passwd'))){
-            $_SESSION['refill'][$camp] = $valor;
-        }
-        if ($camp == 'passwd'){
-            $resultats['passwd'] = password_hash($resultats['passwd'], PASSWORD_BCRYPT, ['cost'=>4]);
-        }
-    }
-    
-}
-
-if (!empty($_SESSION['errors'])) {
+if (!empty($registerData['errors'])) {
     header("Location: ../index.php");
 }else{
-    $_SESSION['errors']['registerStatus'] = registerUser($resultats);
+    unset($_SESSION['refill']);
+    if (userExists($userData['email'])) {
+        $_SESSION['errors']['registerFailed'] = "ERROR: Aquest usuari ja existeix!";
+    }else{
+        require '../includes/connect.php';
+        //Preparar la consulta:
+        $qry = 'INSERT INTO usuaris (nom,cognom,email,`password`,`data`) VALUES (?,?,?,?,?)';
+        $consulta = $conn->prepare($qry);
+
+        //Executar la consulta:
+        $resultats['date'] = date("Y-m-d");
+        $consulta->bind_param('sssss',$userData['name'], $userData['surname'], $userData['email'], $userData['passwd'], $userData['date']);
+        $consulta->execute();
+        $consulta->close();
+        $conn->close();
+        
+        //Si resposta segons si hi ha hagut o no error:
+        if($consulta->errno == 0){
+            $_SESSION['errors']['registerSuccess'] = "Usuari registrat correctament!";
+        }else{
+            $_SESSION['errors']['registerFailed'] = "ERROR: No s'ha pogut registrar l'usuari.";
+        }
+    }
+
     header("Location: ../index.php");
 }
 
