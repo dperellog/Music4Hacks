@@ -33,9 +33,9 @@ if (!isset($_SESSION)) {
         </div>
         <nav class="navbar navbar-expand-sm navbar-dark">
             <ul class="nav nav-sm">
-                <li class="nav-item"><a href="#" class="nav-link active text-light">Inici</a></li>
-                <li class="nav-item"><a href="#" class="nav-link text-light">Tutorials</a></li>
-                <li class="nav-item"><a href="#" class="nav-link text-light">Partitures</a></li>
+                <?php foreach (getCategories() as $categoria) {
+                    echo '<li class="nav-item"><a href="#" class="nav-link active text-light">'.$categoria['nombre'].'</a></li>';
+                } ?>
                 <li class="nav-item"><a href="#" class="nav-link disabled">Sobre nosaltres</a></li>
                 <li class="nav-item"><a href="#" class="nav-link disabled">Contacte</a></li>
             </ul>

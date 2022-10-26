@@ -65,8 +65,6 @@ function userExists($userEmail) : bool{
         require 'connect.php';
     }
 
-    $userEmail = 'dperellog@gmail.com';
-
     //Preparar consulta dels usuaris
     $qry = 'SELECT * FROM usuaris WHERE email = ?';
     $consulta = $conn->prepare($qry);
@@ -83,4 +81,29 @@ function userExists($userEmail) : bool{
 
 function isLogged() : bool {
     return isset($_SESSION['userData']['id']);
+}
+
+function getCategories() : array {
+    if(isset($conn)){
+        global $conn;
+    }else{
+        require 'connect.php';
+    }
+
+    //Preparar consulta dels usuaris
+    $qry = 'SELECT * FROM categories';
+    $consulta = $conn->prepare($qry);
+
+    //Fer consulta:
+    $consulta->execute();
+    $result = $consulta->get_result();
+    $conn->close();
+
+    //Crear array:
+    $dades = array();
+    while ($reg = $result->fetch_assoc()) {
+        array_push($dades, $reg);
+    }
+
+    return $dades;
 }

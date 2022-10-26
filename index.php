@@ -6,10 +6,13 @@ $pageName = 'Home';
 
 
 include_once 'includes/header.php';
+include_once 'includes/functions.php';
 
 ?>
 <div class="row mt-4">
-    <div class="col-sm-9 main-content"><?php var_dump($_SESSION)?></div>
+    <div class="col-sm-9 main-content">
+
+    </div>
     <?php include 'includes/sidebar.php' ?>
 </div>
 
