@@ -52,12 +52,12 @@ unset($_SESSION['refill']);
             <?= isset($errors['loginIncorrect']) ? '<p class="alert alert-danger">Credencials incorrectes!</p>' : null ?>
             <div class="mb-3 mt-3">
                 <label for="email" class="form-label">Email:</label>
-                <input class="form-control mb-2" type="email" name="loginEmail" id="email" <?= isset($refill['loginEmail']) ? 'value="'.$refill['loginEmail'].'"' : null ?>>
+                <input class="form-control mb-2" type="email" name="loginEmail" id="loginEmail" <?= isset($refill['loginEmail']) ? 'value="'.$refill['loginEmail'].'"' : null ?>>
                 <?= isset($errors['loginEmail']) ? '<p class="alert alert-danger">El format de correu no és vàlid.</p>' : null ?>
             </div>
             <div class="mb-3 mt-3">
                 <label for="passwd" class="form-label">Password:</label>
-                <input class="form-control mb-2" type="password" name="loginPasswd" id="passwd">
+                <input class="form-control mb-2" type="password" name="loginPasswd" id="loginPasswd">
                 <?= isset($errors['loginPasswd']) ? '<p class="alert alert-danger">Has d\'especificar una contrasenya!</p>' : null ?>
             </div>
             <input class="btn btn-primary mb-2" type="submit" name="loginUser" value="Iniciar sessió">

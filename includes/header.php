@@ -17,28 +17,34 @@ if (!isset($_SESSION)) {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="assets/css/bootstrap.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/custom.css">
     <title><?= getPageName(); ?></title>
 </head>
 <body>
     <div class="container-fluid">
     <header class="row py-4 text-bg-dark text-center">
-        <div class="col align-items-center slogan">
+        <div class="row align-items-center slogan">
             <h1>Music4Hacks</h1>
         </div>
-        <div class="w-100"></div>
-        <div class="col align-items-center">
-            <h2 class="small">El blog que mostra com hackejar la música.</h2>
+        <div class="row align-items-center">
+                <h2 class="small">El blog que mostra com hackejar la música.</h2>
         </div>
-        <nav class="navbar navbar-expand-sm navbar-dark">
-            <ul class="nav nav-sm">
-                <?php foreach (getCategories() as $categoria) {
-                    echo '<li class="nav-item"><a href="#" class="nav-link active text-light">'.$categoria['nombre'].'</a></li>';
-                } ?>
-                <li class="nav-item"><a href="#" class="nav-link disabled">Sobre nosaltres</a></li>
-                <li class="nav-item"><a href="#" class="nav-link disabled">Contacte</a></li>
-            </ul>
-        </nav>
+        <div class="row px-4">
+            <nav class=" navbar navbar-expand-sm navbar-dark">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <?php foreach (getCategories() as $categoria) {
+                        echo '<li class="nav-item"><a href="#" class="nav-link active">'.$categoria['nombre'].'</a></li>';
+                    } ?>
+                    <li class="nav-item"><a href="#" class="nav-link disabled">Sobre nosaltres</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link disabled">Contacte</a></li>
+                </ul>
+            </div>
+            </nav>
+        </div>
     </header>
     
