@@ -5,11 +5,43 @@ header{
     box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
 }
 
+header a, header a:hover{
+    color: white;
+    text-decoration: none;
+}
+
+aside{
+    padding-right: 0px !important;
+}
+
 aside > div{
     border-radius: 8px;
     box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
 }
 
+aside > div:not(:last-child){
+    margin-bottom: 1.5rem;
+}
+
 div.userActions > a{
     border-radius: 10px !important;
+}
+
+body div.main-content{
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+.content-box{
+    background-color: #e7e7e7;
+    padding: 1rem 1rem;
+    border-radius: 8px;
+}
+
+.content-box .content{
+    background-color: #ffffff;
+    margin-top: 1.5rem;
+    padding: 1rem 1rem;
+    border-radius: 8px;
 }

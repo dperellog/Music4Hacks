@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 $pageName = 'Home';
 
-
-include_once 'includes/header.php';
 include_once 'includes/functions.php';
+include_once 'includes/header.php';
+
 
 ?>
-<div class="row mt-4">
-    <div class="col-sm-9 main-content">
+    <div class="main-content col-md-8 col-lg-9 col-xl-10">
+        <?php 
 
+    ?>
     </div>
     <?php include 'includes/sidebar.php' ?>
-</div>
 
 <?php
 include_once 'includes/footer.php';

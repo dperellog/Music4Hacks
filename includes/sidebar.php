@@ -2,6 +2,12 @@
 // Document que conté el codi que genera la sidebar.
 declare(strict_types=1);
 
+//If accessed directly, redirect.
+$pageRequired = explode('/',$_SERVER['SCRIPT_NAME']);
+if (end($pageRequired) == basename(__FILE__)) {
+header("Location: ../index.php");
+}
+
 if (!isset($_SESSION)) {
 session_start();
 }
@@ -16,15 +22,16 @@ unset($_SESSION['errors']);
 unset($_SESSION['refill']);
 
 ?>
-<aside class="col-md me-4 aside">
+<aside class="col aside">
 
     <?php if (isLogged()): ?>
-    <div class="bg-white p-3 mt-4">
+        <!-- USER LOGGED MENU -->
+    <div class="bg-white p-3">
         <h4>Benvingut, <?= $_SESSION['userData']['nom'] ?></h4>
         <div class="btn-group-vertical d-grid gap-2 userActions mt-3 mx-auto">
             <a class="btn btn-warning" href="#" role="button">Les Meves Dades</a>
-            <a class="btn btn-success" href="#" role="button">Entrades</a>
-            <a class="btn btn-success" href="#" role="button">Categories</a>
+            <a class="btn btn-success" href="entrades.php" role="button">Entrades</a>
+            <a class="btn btn-success" href="categories.php" role="button">Categories</a>
             <a class="btn btn-secondary" href="logout.php" role="button">Tancar sessió</a>
         </div>
         
@@ -34,7 +41,7 @@ unset($_SESSION['refill']);
     <?php endif; ?>
 
     <!-- SEARCH FORM -->
-    <div class="bg-white p-3 mt-4">
+    <div class="bg-white p-3">
         <form action="search.php" method="get">
             <h4>Cerca:</h4>
             <input class="form-control mb-2" type="text" name="s" id="searchinput">
@@ -45,7 +52,7 @@ unset($_SESSION['refill']);
     <?php if (!isLogged()): ?>
 
     <!-- LOGIN FORM -->
-    <div class="bg-white mt-4 p-3">
+    <div class="bg-white p-3">
         <form action="functional/login.php" method="post">
             <h4>Identifica't:</h4>
             <?= isset($errors['loginSuccess']) ? '<p class="alert alert-success">Usuari loguejat correctament!</p>' : null ?>
@@ -65,7 +72,7 @@ unset($_SESSION['refill']);
     </div>
 
     <!-- REGISTER FORM -->
-    <div class="bg-white mt-4 p-3">
+    <div class="bg-white p-3">
         <form action="functional/register.php" method="post">
             <h4>Regista't:</h4>
             <?= isset($errors['registerSuccess']) ? '<p class="alert alert-success">'.$errors['registerSuccess'].'</p>' : null ?>

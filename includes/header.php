@@ -2,6 +2,12 @@
 // Fitxer que conté la capalera del blog.
 declare(strict_types=1);
 
+//If accessed directly, redirect.
+$pageRequired = explode('/',$_SERVER['SCRIPT_NAME']);
+if (end($pageRequired) == basename(__FILE__)) {
+header("Location: ../index.php");
+}
+
 $pageName = $pageName ?? 'Music4Hacks';
 
 require_once 'functions.php';
@@ -9,7 +15,6 @@ require_once 'functions.php';
 if (!isset($_SESSION)) {
     session_start();
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="ca-ES">
@@ -25,10 +30,8 @@ if (!isset($_SESSION)) {
     <div class="container-fluid">
     <header class="row py-4 text-bg-dark text-center">
         <div class="row align-items-center slogan">
-            <h1>Music4Hacks</h1>
-        </div>
-        <div class="row align-items-center">
-                <h2 class="small">El blog que mostra com hackejar la música.</h2>
+            <a href="index.php"><h1>Music4Hacks</h1></a>
+            <h2 class="small">El blog que mostra com hackejar la música.</h2>
         </div>
         <div class="row px-4">
             <nav class=" navbar navbar-expand-sm navbar-dark">
@@ -37,9 +40,11 @@ if (!isset($_SESSION)) {
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
-                    <?php foreach (getCategories() as $categoria) {
-                        echo '<li class="nav-item"><a href="#" class="nav-link active">'.$categoria['nombre'].'</a></li>';
-                    } ?>
+                    <?php 
+                    foreach (getCategories() as $categoria) {
+                        echo '<li class="nav-item"><a href="categories.php?catid='.$categoria['id'].'" class="nav-link active">'.$categoria['nombre'].'</a></li>';
+                    } 
+                    ?>
                     <li class="nav-item"><a href="#" class="nav-link disabled">Sobre nosaltres</a></li>
                     <li class="nav-item"><a href="#" class="nav-link disabled">Contacte</a></li>
                 </ul>
@@ -47,4 +52,5 @@ if (!isset($_SESSION)) {
             </nav>
         </div>
     </header>
+    <div class="row my-4 mx-2 page-content">
     

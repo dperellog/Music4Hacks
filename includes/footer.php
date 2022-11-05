@@ -2,8 +2,14 @@
 // Fitxer que conté el peu de pàgina.
 declare(strict_types=1);
 
+//If accessed directly, redirect.
+$pageRequired = explode('/',$_SERVER['SCRIPT_NAME']);
+if (end($pageRequired) == basename(__FILE__)) {
+header("Location: ../index.php");
+}
 
 ?>
+</div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>

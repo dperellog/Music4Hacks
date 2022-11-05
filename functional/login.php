@@ -2,6 +2,12 @@
 // Fitxer que conté les utilitats per iniciar sessió d'un usuari.
 declare(strict_types=1);
 
+//If accessed directly, redirect.
+$pageRequired = explode('/',$_SERVER['SCRIPT_NAME']);
+if (end($pageRequired) == basename(__FILE__)) {
+header("Location: ../index.php");
+}
+
 //Start session:
 if (!isset($_SESSION)) {
 session_start();
@@ -28,20 +34,12 @@ if (sizeof($_SESSION['errors']) > 0) {
 }else{
 
 //Obtenir l'usuari de la BBDD:
-    require_once '../includes/connect.php';
+    $userEmail = $userData['loginEmail'];
+    $usuari = selectDB(array('table' => 'usuaris', 'fields' => array('email' => $userEmail, '...')));
 
-    //Preparar la consulta:
-    $qry = 'SELECT * FROM usuaris WHERE email = ?';
-    $consulta = $conn->prepare($qry);
-
-    //Executar la consulta:
-    $consulta->bind_param('s',$userData['loginEmail']);
-    $consulta->execute();
-    $results = $consulta->get_result();
-    $consulta->close();
-
-    if ($results->num_rows > 0) {
-        $usuari = $results->fetch_assoc();
+    if (!empty($usuari)) {
+        //Si existeix un usuari, selecciona'l del array.
+        $usuari = $usuari[0];
 
         //Check passwd:
         if (password_verify($userData['loginPasswd'], $usuari['password'])) {
@@ -53,7 +51,6 @@ if (sizeof($_SESSION['errors']) > 0) {
         }
         
     }else{
-        echo "not found";
         $_SESSION['errors']['loginIncorrect'] = true;
     }
     header("Location: ../index.php");
