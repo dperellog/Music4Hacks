@@ -67,17 +67,68 @@ function isLogged() : bool {
     return isset($_SESSION['userData']['id']);
 }
 
+function getUserID() : int {
+    return $_SESSION['userData']['id'] ?? 0;
+}
+
 //Taxonomies and entries related functions:
 function getCategories($args = []) : array {
     return selectDB(array('table' => 'categories', 'fields' => $args));
+}
+
+function listCategories($ancor = false) : string {
+    $html = '';
+    $cats = getCategories();
+
+    if ($cats) {
+        $html .= '<ul>';
+        foreach ($cats as $categoria) {
+            $html .= '<li class=""><a href="categories.php?id='.$categoria['id'].'" class="nav-link active">'.$categoria['nombre'].'</a></li>';;
+        }
+        $html .= '</ul>';
+    } else {
+        $html .= '<p class="alert alert-warning">Alerta! No s\'ha creat encara cap categoria.</p>';
+    }
+
+    return $html;
 }
 
 function categoryExists($catName) : bool{
     return !empty(getCategories(array('nombre' => $catName)));
 }
 
+function getEntries($pagination = true, $page = 0) : array{
+    $postsPerPage = 5;
+    if ($pagination) {
+        $entries = selectDB(array('table' => 'entrades', 'order' => 'DESC', 'pagination' => array($page*$postsPerPage, $postsPerPage)));
+    }else{
+        $entries = selectDB(array('table' => 'entrades', 'order' => 'DESC'));
+    }
+    return $entries;
+}
+
+function showEntry($entry) : string{
+    $maxChar = 150;
+    $catName = selectDB(array('table' => 'categories', 'fields' => array('id' => $entry['categoria_id'], '...')))[0]['nombre'];
+    $authorName = selectDB(array('table' => 'usuaris', 'fields' => array('id' => $entry['usuari_id'], '...')))[0]['nom'];
+    
+    $html = '<div class="row entry-preview m-1"><div class="col-sm">
+        <div class="header">
+        <h4><a href="entrades?id='.$entry['id'].'">'.$entry['titol'].'</a></h4>
+        <p><a href="categories?id='.$entry['categoria_id'].'">'.$catName.'</a> - Escrit per '.$authorName.' || '.$entry['data'].'</p>
+        </div>
+        <p>';
+    
+    $html  .= strlen($entry['descripcio']) > $maxChar ? substr($entry['descripcio'], 0, $maxChar-3) . '...' : $entry['descripcio'];
+    $html.= '</p>
+        <a href="entrades?id='.$entry['id'].'" class="read-more">Llegir més</a>
+        </div></div>
+    ';
+    return $html;
+}
+
 //Database related functions:
-function selectDB($args = ['table' => '', 'fields' => []]) : array{
+function selectDB($args = ['table' => '', 'fields' => [], 'order' => 'DESC', 'pagination' => array(0, 0)]) : array{
     /*
     ->  Aquesta funció fa d'interfície per realitzar selects a la base de dades.
         - Permet especificar quins camps vols obtenir i filtrar directament el resultat.
@@ -85,6 +136,8 @@ function selectDB($args = ['table' => '', 'fields' => []]) : array{
     $args = [
         table = $tablename (string),
         *fields = $fields => $where (array),
+        order = ASC|DESC (string),
+        pagination = array(offset, number of elements)
     ]
 
     *fields => If $where is empty, there will be no "where" condition. Use '...' to select all fields.
@@ -98,6 +151,8 @@ function selectDB($args = ['table' => '', 'fields' => []]) : array{
     $fields = '*';
     $where = '';
     $whereValues = ['types' => [], 'values' => []];
+    $order = $args['order'] ?? 'ASC';
+    $pagination = isset($args['pagination']) ? 'LIMIT '.implode(", ", $args['pagination']) : '';
 
     //If there's no table, return void array.
     if (empty($args['table'])) {
@@ -147,7 +202,7 @@ function selectDB($args = ['table' => '', 'fields' => []]) : array{
     }
 
     //Muntar la query:
-    $qry = "SELECT $fields FROM $table $where";
+    $qry = "SELECT $fields FROM $table $where ORDER BY `id` $order $pagination";
 
     //Executar consulta:    
     try {

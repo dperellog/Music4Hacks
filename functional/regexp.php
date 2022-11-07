@@ -8,6 +8,8 @@ if (end($pageRequired) == basename(__FILE__)) {
 header("Location: ../index.php");
 }
 
+include_once '../includes/functions.php';
+
 $regExp['registerUser'] = [
     'name' => function($v){ 
         return preg_match("/^[a-zA-Z ]*$/",$v) && !empty($v);},
@@ -31,4 +33,13 @@ $regExp['loginUser'] = [
 $regExp['newCategory'] = [
     'categoryName' => function($v){
         return preg_match("/^[a-zA-Z ]*$/",$v) && !empty($v);}
+];
+
+$regExp['newEntry'] = [
+    'entryName' => function($v){
+        return preg_match("/^[a-zA-Z0-9 ]*$/",$v) && !empty($v);},
+    'entryDescription' => function($v){
+        return !empty($v);},
+    'entryCat' => function($v){
+        return in_array($v, array_map(function($cat){ return $cat['id'];},getCategories()));},
 ];

@@ -29,12 +29,12 @@ $catData = $validatedData['data'];
 
 
 if (!empty($validatedData['errors'])) {
-    header("Location: ../categories.php");
+    header("Location: ../categories.php?action=create");
 }else{
 
     if (categoryExists($catData['categoryName'])) {
         $_SESSION['errors']['newCatFailed'] = 'ERROR: La categoria ja existeix!';
-        header("Location: ../categories.php");
+        header("Location: ../categories.php?action=create");
     }else{
         $consulta = insertDB(array('table' => 'categories', 'fields' => array('nombre' => $catData['categoryName'])));
     }
@@ -46,5 +46,5 @@ if (!empty($validatedData['errors'])) {
         $_SESSION['errors']['newCatFailed'] = 'ERROR: No s\'ha pogut crear la categoria.';
     }
 
-    header("Location: ../categories.php");
+    header("Location: ../categories.php?action=create");
     }

@@ -30,8 +30,8 @@ unset($_SESSION['refill']);
         <h4>Benvingut, <?= $_SESSION['userData']['nom'] ?></h4>
         <div class="btn-group-vertical d-grid gap-2 userActions mt-3 mx-auto">
             <a class="btn btn-warning" href="#" role="button">Les Meves Dades</a>
-            <a class="btn btn-success" href="entrades.php" role="button">Entrades</a>
-            <a class="btn btn-success" href="categories.php" role="button">Categories</a>
+            <a class="btn btn-success" href="entrades.php?action=create" role="button">Entrades</a>
+            <a class="btn btn-success" href="categories.php?action=create" role="button">Categories</a>
             <a class="btn btn-secondary" href="logout.php" role="button">Tancar sessió</a>
         </div>
         
