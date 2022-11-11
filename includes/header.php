@@ -42,7 +42,7 @@ if (!isset($_SESSION)) {
                 <ul class="navbar-nav mr-auto">
                     <?php 
                     foreach (getCategories() as $categoria) {
-                        echo '<li class="nav-item"><a href="categories.php?catid='.$categoria['id'].'" class="nav-link active">'.$categoria['nombre'].'</a></li>';
+                        echo '<li class="nav-item"><a href="categories.php?id='.$categoria['id'].'" class="nav-link active">'.$categoria['nombre'].'</a></li>';
                     } 
                     ?>
                     <li class="nav-item"><a href="#" class="nav-link disabled">Sobre nosaltres</a></li>

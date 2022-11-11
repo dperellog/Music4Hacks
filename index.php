@@ -11,18 +11,17 @@ include_once 'includes/header.php';
 ?>
     <div class="main-content col-md-8 col-lg-9 col-xl-10 p-2">
         <?php 
-        //print_r($_SESSION);
-
-        //print_r(getEntries());
+       
+        //var_dump(getEntries(category : 11))
 
         
     ?>
 
-        <div class="container mt-2">
+        <div class="container mt-4">
             <h2>Últimes entrades:</h2>
             <?php  ?>
             <div class="row">
-                <div class="col mt-2">
+                <div class="col mt-2 mx-3">
                 <?php
                     $entrades = getEntries();
 

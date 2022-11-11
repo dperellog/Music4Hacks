@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 //If accessed directly, redirect.
-// $pageRequired = explode('/',$_SERVER['SCRIPT_NAME']);
-// if (end($pageRequired) == basename(__FILE__)) {
-// header("Location: ../index.php");
-// }
+$pageRequired = explode('/',$_SERVER['SCRIPT_NAME']);
+if (end($pageRequired) == basename(__FILE__)) {
+    header("Location: ../index.php");
+}
 
 if (!isset($_SESSION)) {
 session_start();

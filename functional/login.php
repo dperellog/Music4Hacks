@@ -39,7 +39,7 @@ if (sizeof($_SESSION['errors']) > 0) {
 
     if (!empty($usuari)) {
         //Si existeix un usuari, selecciona'l del array.
-        $usuari = $usuari[0];
+        $usuari = $usuari;
 
         //Check passwd:
         if (password_verify($userData['loginPasswd'], $usuari['password'])) {

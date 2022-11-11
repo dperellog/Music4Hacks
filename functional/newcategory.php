@@ -41,9 +41,9 @@ if (!empty($validatedData['errors'])) {
     
     //Si resposta segons si hi ha hagut o no error:
     if($consulta){
-        $_SESSION['errors']['newCatSuccess'] = true;
+        $_SESSION['errors']['ActionSuccess'] = 'Nova categoria creada satisfactoriament!';
     }else{
-        $_SESSION['errors']['newCatFailed'] = 'ERROR: No s\'ha pogut crear la categoria.';
+        $_SESSION['errors']['ActionFailed'] = 'ERROR: No s\'ha pogut crear la categoria.';
     }
 
     header("Location: ../categories.php?action=create");

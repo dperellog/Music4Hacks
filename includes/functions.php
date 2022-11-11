@@ -71,6 +71,20 @@ function getUserID() : int {
     return $_SESSION['userData']['id'] ?? 0;
 }
 
+function getUserData($email = '') : array {
+    if ($email != '') {
+        $user = selectDB(array('table' => 'usuaris', 'fields' => array('email' => $email, '...')));
+        if (!empty($user)) {
+            unset($user['password']);
+            return $user;
+        }else{
+            return $user;
+        }
+    }else{
+        return $_SESSION['userData'];
+    }
+}
+
 //Taxonomies and entries related functions:
 function getCategories($args = []) : array {
     return selectDB(array('table' => 'categories', 'fields' => $args));
@@ -97,22 +111,25 @@ function categoryExists($catName) : bool{
     return !empty(getCategories(array('nombre' => $catName)));
 }
 
-function getEntries($pagination = true, $page = 0) : array{
+function getEntries($pagination = true, $page = 0, $category = '') : array{
     $postsPerPage = 5;
+    $fields = array('...');
+    !empty($category) ? $fields['categoria_id'] = $category : null;
+
     if ($pagination) {
-        $entries = selectDB(array('table' => 'entrades', 'order' => 'DESC', 'pagination' => array($page*$postsPerPage, $postsPerPage)));
+        $entries = selectDB(array('table' => 'entrades', 'fields' => $fields, 'order' => 'DESC', 'pagination' => array($page*$postsPerPage, $postsPerPage)));
     }else{
-        $entries = selectDB(array('table' => 'entrades', 'order' => 'DESC'));
+        $entries = selectDB(array('table' => 'entrades', 'fields' => $fields, 'order' => 'DESC'));
     }
     return $entries;
 }
 
 function showEntry($entry) : string{
     $maxChar = 150;
-    $catName = selectDB(array('table' => 'categories', 'fields' => array('id' => $entry['categoria_id'], '...')))[0]['nombre'];
-    $authorName = selectDB(array('table' => 'usuaris', 'fields' => array('id' => $entry['usuari_id'], '...')))[0]['nom'];
+    $catName = selectDB(array('table' => 'categories', 'fields' => array('id' => $entry['categoria_id'], '...')))['nombre'];
+    $authorName = selectDB(array('table' => 'usuaris', 'fields' => array('id' => $entry['usuari_id'], '...')))['nom'];
     
-    $html = '<div class="row entry-preview m-1"><div class="col-sm">
+    $html = '<div class="row entry-preview my-1"><div class="col-sm">
         <div class="header">
         <h4><a href="entrades?id='.$entry['id'].'">'.$entry['titol'].'</a></h4>
         <p><a href="categories?id='.$entry['categoria_id'].'">'.$catName.'</a> - Escrit per '.$authorName.' || '.$entry['data'].'</p>
@@ -209,7 +226,8 @@ function selectDB($args = ['table' => '', 'fields' => [], 'order' => 'DESC', 'pa
         $consulta = $conn->prepare($qry);
         !empty($where) ? $consulta->bind_param(implode($whereValues['types']),...$whereValues['values']) : null;
         $consulta->execute();
-    } catch (mysqli_sql_exception){
+    } catch (mysqli_sql_exception $e){
+        print_r($e);
         $conn->close();
         return $data;
     }
@@ -224,7 +242,7 @@ function selectDB($args = ['table' => '', 'fields' => [], 'order' => 'DESC', 'pa
         array_push($dades, $reg);    
     }
 
-    return $dades;
+    return sizeof($dades) == 1 ? $dades[0] : $dades;
 
 }
 
@@ -297,6 +315,93 @@ function insertDB($args = ['table' => '', 'fields' => []]) : bool{
     return true;
     
 }
+
+function updateDB($args = ['table' => '', 'fields' => [], 'where' => []]) : bool{
+    /*
+      ->  Aquesta funció fa d'interfície per insertar registres a la base de dades.
+          - Retorna booleà segons si ha pogut insertar o no.
+          
+      $args = [
+          table = $tablename (string),
+          *fields = $field => $value (array),
+      ]
+  
+      *fields => Si falten camps, la funció retorna fals.
+  
+      */
+  
+  
+      //Function variables:
+  
+      //If there's no table, return false.
+      if (empty($args['table']) || empty($args['where'])) {
+          return false;
+      }
+  
+      $table = $args['table'];
+      $where = $args['where'];
+  
+      //Si no tenim dades a actualitzar, retorna fals.
+      if (empty($args['fields'])){
+          return false;
+      }
+  
+      //Muntar la relació camp-valor:
+      $columns = array_keys($args['fields']);
+      $valueTypes = ['types' => [], 'values' => []];
+
+      foreach ($args['fields'] as $key => $value) {
+  
+          //Muntar una array per lligar els paràmetres (fer el BIND).
+          if (gettype($value) == 'integer') {
+              array_push($valueTypes['types'], 'i');
+              array_push($valueTypes['values'], intval($value));
+          }else{
+              array_push($valueTypes['types'], str_contains($key, 'id') ? 'i' : 's');
+              array_push($valueTypes['values'], $value);
+          }
+              
+      }
+
+      foreach ($where as $key => $value) {
+  
+        //Muntar una array per lligar els paràmetres del WHERE.
+        if (gettype($value) == 'integer') {
+            array_push($valueTypes['types'], 'i');
+            array_push($valueTypes['values'], intval($value));
+        }else{
+            array_push($valueTypes['types'], str_contains($key, 'id') ? 'i' : 's');
+            array_push($valueTypes['values'], $value);
+        }
+            
+    }
+  
+  
+      //REALITZAR EL INSERT:
+      if(isset($conn)){
+          global $conn;
+      }else{
+          require 'connect.php';
+      }
+
+      print_r($where);
+  
+      //Muntar la query:
+      $qry = "UPDATE $table SET ".implode(", ",array_map(function($col){return "$col = ?";}, $columns))." WHERE ".implode(" AND ",array_map(function($key){return "$key = ?";}, array_keys($where)))."";
+      print_r($qry);
+      //Executar consulta:    
+       try {
+           $consulta = $conn->prepare($qry);
+           $consulta->bind_param(implode($valueTypes['types']),...$valueTypes['values']);
+           $consulta->execute();
+       } catch (mysqli_sql_exception){
+           $conn->close();
+           return false;
+       }
+       $conn->close();
+       return true;
+      
+  }
 
 //Miscelanea:
 function getPageName() : string{
