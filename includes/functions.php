@@ -90,23 +90,6 @@ function getCategories($args = []) : array {
     return selectDB(array('table' => 'categories', 'fields' => $args));
 }
 
-function listCategories($ancor = false) : string {
-    $html = '';
-    $cats = getCategories();
-
-    if ($cats) {
-        $html .= '<ul>';
-        foreach ($cats as $categoria) {
-            $html .= '<li class=""><a href="categories.php?id='.$categoria['id'].'" class="nav-link active">'.$categoria['nombre'].'</a></li>';;
-        }
-        $html .= '</ul>';
-    } else {
-        $html .= '<p class="alert alert-warning">Alerta! No s\'ha creat encara cap categoria.</p>';
-    }
-
-    return $html;
-}
-
 function categoryExists($catName) : bool{
     return !empty(getCategories(array('nombre' => $catName)));
 }
@@ -121,18 +104,26 @@ function getEntries($pagination = true, $page = 0, $category = '') : array{
     }else{
         $entries = selectDB(array('table' => 'entrades', 'fields' => $fields, 'order' => 'DESC'));
     }
+
+    //Si només dona un resultat.
+    if (!empty($entries)) {
+        if (count($entries) == count($entries, COUNT_RECURSIVE)) {
+            $entries = array($entries);
+        }
+    }
     return $entries;
 }
 
 function showEntry($entry) : string{
+
     $maxChar = 150;
     $catName = selectDB(array('table' => 'categories', 'fields' => array('id' => $entry['categoria_id'], '...')))['nombre'];
     $authorName = selectDB(array('table' => 'usuaris', 'fields' => array('id' => $entry['usuari_id'], '...')))['nom'];
     
     $html = '<div class="row entry-preview my-1"><div class="col-sm">
         <div class="header">
-        <h4><a href="entrades?id='.$entry['id'].'">'.$entry['titol'].'</a></h4>
-        <p><a href="categories?id='.$entry['categoria_id'].'">'.$catName.'</a> - Escrit per '.$authorName.' || '.$entry['data'].'</p>
+        <h4><a href="entrades.php?id='.$entry['id'].'">'.$entry['titol'].'</a></h4>
+        <p><a href="categories.php?id='.$entry['categoria_id'].'">'.$catName.'</a> - Escrit per '.$authorName.' || '.$entry['data'].'</p>
         </div>
         <p>';
     
@@ -394,18 +385,48 @@ function updateDB($args = ['table' => '', 'fields' => [], 'where' => []]) : bool
            $consulta = $conn->prepare($qry);
            $consulta->bind_param(implode($valueTypes['types']),...$valueTypes['values']);
            $consulta->execute();
-       } catch (mysqli_sql_exception){
+       } catch (mysqli_sql_exception $e){
+        print_r($e);
            $conn->close();
            return false;
        }
        $conn->close();
        return true;
       
-  }
+}
 
 //Miscelanea:
 function getPageName() : string{
+    //Funció que retorna el nom de la pàgina.
     global $pageName;
 
     return "$pageName - Music4Hacks";
+}
+
+function getErrorsAlert($errors) : string{
+    //Funció que retorna un HTML amb errors.
+    $html = '<div class="row">';
+
+    foreach ($errors as $error => $msg) {
+        switch ($error) {
+            case 'actionSuccess':
+                $html .= '<div class="alert alert-success" role="alert">' . $msg . '</div>';
+                break;
+            case 'actionFailed':
+                $html .= '<div class="alert alert-danger" role="alert">' . $msg . '</div>';
+                break;
+        }
+    }
+    
+    return $html .= '</div>';
+}
+
+function translateKeys($array, $keys) : array{
+    //$keys = [oldKey] => 'newKey';
+
+    $arrReturn = array();
+    foreach ($keys as $oldKey => $newKey) {
+        $arrReturn[$newKey] = $array[$oldKey];
+    }
+    return $arrReturn;
 }

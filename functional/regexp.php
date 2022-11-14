@@ -34,6 +34,12 @@ $regExp['newCategory'] = [
     'categoryName' => function($v){
         return preg_match("/^[a-zA-Z ]*$/",$v) && !empty($v);}
 ];
+$regExp['editCategory'] = [
+    'categoryName' => function($v){
+        return preg_match("/^[a-zA-Z ]*$/",$v) && !empty($v);},
+    'catId' => function($v){
+        return is_numeric($v);}
+];
 
 $regExp['newEntry'] = [
     'entryName' => function($v){
@@ -42,4 +48,14 @@ $regExp['newEntry'] = [
         return !empty($v);},
     'entryCat' => function($v){
         return in_array($v, array_map(function($cat){ return $cat['id'];},getCategories()));},
+];
+
+$regExp['updateUserData'] = [
+    'name' => function($v){ 
+        return preg_match("/^[a-zA-Z ]*$/",$v) && !empty($v);},
+    'surname' => function($v){ 
+        return preg_match("/^[a-zA-Z ]*$/",$v) && !empty($v);},
+    'email' => function($v){
+        $v = filter_var($v, FILTER_SANITIZE_EMAIL); 
+        return filter_var($v, FILTER_VALIDATE_EMAIL);}
 ];

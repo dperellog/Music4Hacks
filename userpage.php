@@ -35,14 +35,11 @@ include_once 'includes/header.php';
             <h2 class="h6">Modificar dades personals.</h2>
             <hr class="mt-2">
         </div>
-        <div class="row">
-            <?= isset($errors['modifyUserDataSuccess']) ? '<div class="alert alert-success" role="alert">Dades actualitzades exitosament!</div>' : null ?>
-            <?= isset($errors['modifyUserDataFailed']) ? '<div class="alert alert-danger" role="alert">' . $errors['modifyUserDataFailed'] . '</div>' : null ?>
-        </div>
+        <?= isset($errors['updateUserData']) ? getErrorsAlert($errors['updateUserData']) : null ?>
 
         <div class="row">
             <div class="col-sm content-box">
-                <form action="functional/editUserData.php" method="post" class="content">
+                <form action="functional/actionForm.php" method="post" class="content">
                     <div class="mb-2">
                         <label for="name" class="form-label">Nom:</label>
                         <input type="text" name="name" id="name" value="<?= $userData['nom'] ?>" class="form-control">

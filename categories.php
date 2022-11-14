@@ -27,7 +27,7 @@ switch ($action) {
 }
 
 
-if ($action == 'create') {
+if ($action == 'create' || $action == 'edit') {
     //Download errors:
     $errors = $_SESSION['errors'] ?? array();
     $refill = $_SESSION['refill'] ?? array();
@@ -50,22 +50,28 @@ include_once 'includes/header.php';
             <h2 class="h6"><?= $action == 'create' ? 'Afegir noves categories al blog.' : 'Editant '.$categoryData['nombre'] ?></h2>
             <hr class="mt-2">
         </div>
-        <div class="row">
-            <?= isset($errors['ActionSuccess']) ? '<div class="alert alert-success" role="alert">' . $errors['ActionSuccess'] . '</div>' : null ?>
-            <?= isset($errors['ActionFailed']) ? '<div class="alert alert-danger" role="alert">' . $errors['ActionFailed'] . '</div>' : null ?>
-        </div>
+
+        <?= isset($errors['newCategory']) ? getErrorsAlert($errors['newCategory']) : null ?>
+        <?= isset($errors['editCategory']) ? getErrorsAlert($errors['editCategory']) : null ?>
 
         <div class="row">
             <div class="col-sm-8 content-box">
                 <h4><?= $action == 'create' ? 'Crear nova categoria:' : 'Editant '.$categoryData['nombre'] ?></h4>
-                <form action="functional/newcategory.php" method="post" class="content">
+                <form action="functional/actionForm.php" method="post" class="content">
                     <div class="mb-2">
                         <label for="category-name" class="form-label">Nom de la categoria:</label>
                         <input type="text" name="categoryName" class="form-control" value="<?= isset($categoryData) ? $categoryData['nombre'] : null; ?>">
                         <?= isset($errors['categoryName']) ? '<p class="alert alert-danger mt-2">El nom de la categoria ha de cumplir els requisits!</p>' : null ?>
                         <div class="form-text">Intordueix un nom amb només lletres i espais.</div>
                     </div>
-                    <input type="submit" name="newCategory" value="Crear categoria" class="btn btn-primary mt-2">
+                    <?php
+                    if ($action == 'edit') {
+                        echo '<input type="hidden" name="catId" value="'.$categoryData['id'].'">';
+                        echo '<input type="submit" name="editCategory" value="Modificar categoria" class="btn btn-primary mt-2">';
+                    }else{
+                        '<input type="submit" name="newCategory" value="Crear categoria" class="btn btn-primary mt-2">';
+                    } ?>
+                    
                 </form>
             </div>
             <div class="col-sm ms-2 content-box">
@@ -83,12 +89,6 @@ include_once 'includes/header.php';
                     } else {
                         echo '<p class="alert alert-warning">Alerta! No s\'ha creat encara cap categoria.</p>';
                     }
-                    
-                    
-                    
-                    
-                    
-                    
                     ?>
                 </div>
             </div>

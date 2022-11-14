@@ -53,10 +53,9 @@ unset($_SESSION['refill']);
 
     <!-- LOGIN FORM -->
     <div class="bg-white p-3">
-        <form action="functional/login.php" method="post">
+        <form action="functional/actionForm.php" method="post">
             <h4>Identifica't:</h4>
-            <?= isset($errors['loginSuccess']) ? '<p class="alert alert-success">Usuari loguejat correctament!</p>' : null ?>
-            <?= isset($errors['loginIncorrect']) ? '<p class="alert alert-danger">Credencials incorrectes!</p>' : null ?>
+            <?= isset($errors['loginUser']) ? getErrorsAlert($errors['loginUser']) : null ?>
             <div class="mb-3 mt-3">
                 <label for="email" class="form-label">Email:</label>
                 <input class="form-control mb-2" type="email" name="loginEmail" id="loginEmail" <?= isset($refill['loginEmail']) ? 'value="'.$refill['loginEmail'].'"' : null ?>>
@@ -73,10 +72,9 @@ unset($_SESSION['refill']);
 
     <!-- REGISTER FORM -->
     <div class="bg-white p-3">
-        <form action="functional/register.php" method="post">
+        <form action="functional/actionForm.php" method="post">
             <h4>Regista't:</h4>
-            <?= isset($errors['registerSuccess']) ? '<p class="alert alert-success">'.$errors['registerSuccess'].'</p>' : null ?>
-            <?= isset($errors['registerFailed']) ? '<p class="alert alert-danger">'.$errors['registerFailed'].'</p>' : null ?>            
+            <?= isset($errors['registerUser']) ? getErrorsAlert($errors['registerUser']) : null ?>       
              
             <div class="mb-3 mt-3">
                 <label for="name" class="form-label">Nom:</label>

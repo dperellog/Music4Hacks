@@ -67,15 +67,15 @@ body div.main-content{
 }
 
 .header p a{
-    color: rgb(186, 186, 186)fff
+    color: rgb(186, 186, 186);
 }
 
-.entry-preview a{
+.entry-preview a, .entry-header a{
     text-decoration: none;
     color: black;
 }
 
-.entry-preview a:hover{
+.entry-preview a:hover, .entry-header a:hover{
     text-decoration: none;
     color: #0d6efd;
 }
