@@ -22,6 +22,7 @@ if (!isset($_SESSION)) {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="assets/img/favicon.png" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/custom.css">
     <title><?= getPageName(); ?></title>
@@ -34,7 +35,7 @@ if (!isset($_SESSION)) {
             <h2 class="small">El blog que mostra com hackejar la música.</h2>
         </div>
         <div class="row px-4">
-            <nav class=" navbar navbar-expand-sm navbar-dark">
+            <nav class=" navbar navbar-expand-sm navbar-dark px-2">
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -45,8 +46,8 @@ if (!isset($_SESSION)) {
                         echo '<li class="nav-item"><a href="categories.php?id='.$categoria['id'].'" class="nav-link active">'.$categoria['nombre'].'</a></li>';
                     } 
                     ?>
-                    <li class="nav-item"><a href="#" class="nav-link disabled">Sobre nosaltres</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link disabled">Contacte</a></li>
+                    <li class="nav-item"><a href="aboutus.php" class="nav-link">Sobre nosaltres</a></li>
+                    <li class="nav-item"><a href="contact.php" class="nav-link">Contacte</a></li>
                 </ul>
             </div>
             </nav>

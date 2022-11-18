@@ -8,8 +8,11 @@ if (end($pageRequired) == basename(__FILE__)) {
 header("Location: ../index.php");
 }
 
+//Constants:
+define('POSTS_PER_PAGE', 5);
+
 //Validations:
-function sanitStr($str) : string {
+function sanitStr(string $str) : string {
 
     $str = trim($str);
     $str = stripslashes($str);
@@ -18,7 +21,16 @@ function sanitStr($str) : string {
     return $str;
 }
 
-function validateData($inputData, $form) : array {
+/**
+ * Funció que valida les dades d'un formulari i retorna un array amb errors, refills i dades.
+ *
+ * @param array $inputData Dades del formulari amb l'estil de $_POST.
+ * @param string $form Nom del formulari utilitzat per validar dades.
+ * @return array Retorna les següents claus: 'data', 'errors', 'refill'.
+ * 
+ */ 
+function validateData(array $inputData, string $form) : array {
+
     $results = array();
     $errors = array();
     $refill = array();
@@ -59,7 +71,14 @@ function validateData($inputData, $form) : array {
 }
 
 //User-related functions:
-function userExists($userEmail) : bool{
+/**
+ * Funció que valida les dades d'un formulari i retorna un array amb errors, refills i dades.
+ *
+ * @param string $userEmail Dades del formulari amb l'estil de $_POST.
+ * @param string $form Nom del formulari utilitzat per validar dades.
+ * 
+ */ 
+function userExists(string $userEmail) : bool{
     return !empty(selectDB(array('table' => 'usuaris', 'fields' => ['email' => $userEmail])));
 }
 
@@ -87,15 +106,23 @@ function getUserData($email = '') : array {
 
 //Taxonomies and entries related functions:
 function getCategories($args = []) : array {
-    return selectDB(array('table' => 'categories', 'fields' => $args));
+    $cats = selectDB(array('table' => 'categories', 'fields' => $args));
+
+    //Si només dona un resultat.
+    if (!empty($cats)) {
+        if (count($cats) == count($cats, COUNT_RECURSIVE)) {
+            $cats = array($cats);
+        }
+    }
+    return $cats;
 }
 
-function categoryExists($catName) : bool{
+function categoryExists(string $catName) : bool{
     return !empty(getCategories(array('nombre' => $catName)));
 }
 
 function getEntries($pagination = true, $page = 0, $category = '') : array{
-    $postsPerPage = 5;
+    $postsPerPage = POSTS_PER_PAGE;
     $fields = array('...');
     !empty($category) ? $fields['categoria_id'] = $category : null;
 
@@ -129,14 +156,44 @@ function showEntry($entry) : string{
     
     $html  .= strlen($entry['descripcio']) > $maxChar ? substr($entry['descripcio'], 0, $maxChar-3) . '...' : $entry['descripcio'];
     $html.= '</p>
-        <a href="entrades?id='.$entry['id'].'" class="read-more">Llegir més</a>
+        <a href="entrades.php?id='.$entry['id'].'" class="read-more">Llegir més</a>
         </div></div>
     ';
     return $html;
 }
 
+function countEntries($catID = 0) : int{
+    if ($catID != 0) {
+        return sizeof(selectDB(array('table'=>'entrades', 'fields' => array('categoria_id' => $catID))));
+    }else{
+        return sizeof(selectDB(array('table'=>'entrades')));
+    }
+}
+
+function getPaginationButtons($baseURL, $actualPage, $catID = 0) : string {
+    $postsPerPage = POSTS_PER_PAGE;
+    $nPosts = countEntries($catID);
+    $page = 1;
+
+    $appendChar = str_contains($baseURL, '?') ? '&' : '?';
+
+    $html = '<nav aria-label="Page navigation example"><ul class="pagination justify-content-center">';
+    for ($i=0; $i <= $nPosts; $i++) { 
+        if ($page == $actualPage) {
+            $html .= '<li class="page-item active" aria-current="page"><a class="page-link" href="'.$baseURL.$appendChar."p=$page".'">'.$page.'</a></li>';
+        }else{
+            $html .= '<li class="page-item"><a class="page-link" href="'.$baseURL.$appendChar."p=$page".'">'.$page.'</a></li>';
+        }
+        $i+=$postsPerPage;
+        $page++;
+    }
+
+    $html .= '</ul></nav>';
+    return $html;
+}
+
 //Database related functions:
-function selectDB($args = ['table' => '', 'fields' => [], 'order' => 'DESC', 'pagination' => array(0, 0)]) : array{
+function selectDB($args = ['table' => '', 'fields' => [], 'order' => 'DESC', 'pagination' => array(0, 0), 'operator' => '=']) : array{
     /*
     ->  Aquesta funció fa d'interfície per realitzar selects a la base de dades.
         - Permet especificar quins camps vols obtenir i filtrar directament el resultat.
@@ -161,6 +218,7 @@ function selectDB($args = ['table' => '', 'fields' => [], 'order' => 'DESC', 'pa
     $whereValues = ['types' => [], 'values' => []];
     $order = $args['order'] ?? 'ASC';
     $pagination = isset($args['pagination']) ? 'LIMIT '.implode(", ", $args['pagination']) : '';
+    $op = $args['operator'] ?? '=';
 
     //If there's no table, return void array.
     if (empty($args['table'])) {
@@ -187,7 +245,7 @@ function selectDB($args = ['table' => '', 'fields' => [], 'order' => 'DESC', 'pa
 
                 //Muntar la WHERE condition de la query:
                 $where.= empty($where) ? 'WHERE ' : ' AND ';
-                $where.= "`$key` = ?";
+                $where.= "`$key` $op ?";
 
                 //Muntar una array per lligar els paràmetres (fer el BIND).
                 if (gettype($value) == 'integer') {
@@ -375,11 +433,79 @@ function updateDB($args = ['table' => '', 'fields' => [], 'where' => []]) : bool
           require 'connect.php';
       }
 
-      print_r($where);
   
       //Muntar la query:
       $qry = "UPDATE $table SET ".implode(", ",array_map(function($col){return "$col = ?";}, $columns))." WHERE ".implode(" AND ",array_map(function($key){return "$key = ?";}, array_keys($where)))."";
-      print_r($qry);
+
+      //Executar consulta:    
+       try {
+           $consulta = $conn->prepare($qry);
+           $consulta->bind_param(implode($valueTypes['types']),...$valueTypes['values']);
+           $consulta->execute();
+       } catch (mysqli_sql_exception $e){
+        print_r($e);
+           $conn->close();
+           return false;
+       }
+       $conn->close();
+       return true;
+      
+}
+
+function deleteDB($args = ['table' => '', 'where' => []]) : bool{
+    /*
+      ->  Aquesta funció fa d'interfície per insertar registres a la base de dades.
+          - Retorna booleà segons si ha pogut insertar o no.
+          
+      $args = [
+          table = $tablename (string),
+          *fields = $field => $value (array),
+      ]
+  
+      *fields => Si falten camps, la funció retorna fals.
+  
+      */
+  
+  
+      //Function variables:
+  
+      //If there's no table, return false.
+      if (empty($args['table']) || empty($args['where'])) {
+          return false;
+      }
+  
+      $table = $args['table'];
+      $where = $args['where'];
+  
+  
+      //Muntar la relació camp-valor:
+      $columns = array_keys($args['where']);
+      $valueTypes = ['types' => [], 'values' => []];
+
+      foreach ($args['where'] as $key => $value) {
+  
+          //Muntar una array per lligar els paràmetres (fer el BIND).
+          if (gettype($value) == 'integer') {
+              array_push($valueTypes['types'], 'i');
+              array_push($valueTypes['values'], intval($value));
+          }else{
+              array_push($valueTypes['types'], str_contains($key, 'id') ? 'i' : 's');
+              array_push($valueTypes['values'], $value);
+          }
+              
+      }
+  
+  
+      //REALITZAR EL DELETE:
+      if(isset($conn)){
+          global $conn;
+      }else{
+          require 'connect.php';
+      }
+  
+      //Muntar la query:
+      $qry = "DELETE FROM $table WHERE ".implode(" AND ",array_map(function($key){return "$key = ?";}, array_keys($where)))."";
+
       //Executar consulta:    
        try {
            $consulta = $conn->prepare($qry);

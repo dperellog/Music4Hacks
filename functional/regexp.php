@@ -41,6 +41,11 @@ $regExp['editCategory'] = [
         return is_numeric($v);}
 ];
 
+$regExp['deleteCategory'] = [
+    'categoryId' => function($v){
+        return is_numeric($v);}
+];
+
 $regExp['newEntry'] = [
     'entryName' => function($v){
         return preg_match("/^[a-zA-Z0-9 ]*$/",$v) && !empty($v);},
@@ -48,6 +53,22 @@ $regExp['newEntry'] = [
         return !empty($v);},
     'entryCat' => function($v){
         return in_array($v, array_map(function($cat){ return $cat['id'];},getCategories()));},
+];
+
+$regExp['editEntry'] = [
+    'entryName' => function($v){
+        return preg_match("/^[a-zA-Z0-9 ]*$/",$v) && !empty($v);},
+    'entryDescription' => function($v){
+        return !empty($v);},
+    'entryCat' => function($v){
+        return in_array($v, array_map(function($cat){ return $cat['id'];},getCategories()));},
+    'entryId' => function($v){
+        return is_numeric($v);}
+];
+
+$regExp['deleteEntry'] = [
+    'entryId' => function($v){
+        return is_numeric($v);}
 ];
 
 $regExp['updateUserData'] = [
@@ -58,4 +79,14 @@ $regExp['updateUserData'] = [
     'email' => function($v){
         $v = filter_var($v, FILTER_SANITIZE_EMAIL); 
         return filter_var($v, FILTER_VALIDATE_EMAIL);}
+];
+
+$regExp['contactMsg'] = [
+    'contactName' => function($v){ 
+        return preg_match("/^[a-zA-Z ]*$/",$v) && !empty($v);},
+    'contactEmail' => function($v){
+        $v = filter_var($v, FILTER_SANITIZE_EMAIL); 
+        return filter_var($v, FILTER_VALIDATE_EMAIL);},
+    'contactMessage' => function($v){
+        return !empty($v);}
 ];

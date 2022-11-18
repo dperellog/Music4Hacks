@@ -20,10 +20,14 @@ session_start();
 $actions = [
     'newCategory' => '../categories.php?action=create', 
     'editCategory' => '../categories.php?action=edit',
-    'newEntry' => '../entrades.php?action=create', 
+    'deleteCategory' => '../categories.php?action=create',
+    'newEntry' => '../entrades.php?action=create',
+    'editEntry' => '../entrades.php?action=edit',
+    'deleteEntry' => '../entrades.php?action=create', 
     'registerUser' => '../index.php',
     'loginUser' => '../index.php',
-    'updateUserData' => '../userpage.php'
+    'updateUserData' => '../userpage.php',
+    'contactMsg' => '../contact.php'
 ];
 $action = array_intersect(array_keys($_POST), array_keys($actions));
 
@@ -88,12 +92,18 @@ if (!empty($validatedData['errors'])) {
                 : array('actionFailed' => 'ERROR: No s\'ha pogut editar la categoria.');
                 
             }
-
-
+            break;
+        
+        case 'deleteCategory':
+            if (sizeof(getEntries(category : $data['categoryId'])) != 0){
+                $response = array('actionFailed' => 'ERROR: No es pot borrar la categoria perquè encara hi han entrades!');
+            }else{
+                $consulta = deleteDB(array('table' => 'categories', 'where' => array('id' => $data['categoryId'])));
+                $response = $consulta 
+                ? array('actionSuccess' => 'Categoria eliminada satisfactoriament!')
+                : array('actionFailed' => 'ERROR: No s\'ha pogut eliminar la categoria.');
+            }
             
-
-
-
             break;
         
         case 'newEntry':
@@ -107,10 +117,30 @@ if (!empty($validatedData['errors'])) {
                 'data' => date("Y-m-d")
                 )
             ));
+            $_SESSION['refill'] = array();
             
             $response = $consulta 
             ? array('actionSuccess' => 'Entrada creada exitosament!')
             : array('actionFailed' => 'ERROR: No s\'ha pogut crear l\'entrada.');
+            break;
+        
+        case 'editEntry':
+            $actions['editEntry'] .= '&id='.$data['entryId'];
+            $consulta = updateDB(array('table'=>'entrades', 'fields'=>array(
+                'titol' => $data['entryName'],
+                'descripcio' => $data['entryDescription'],
+                'categoria_id' => $data['entryCat']),
+                 'where'=>array('id' => $data['entryId'])));
+            $response = $consulta 
+            ? array('actionSuccess' => 'Entrada editada satisfactoriament!')
+            : array('actionFailed' => 'ERROR: No s\'ha pogut editar la entrada.');
+            break;
+
+        case 'deleteEntry':
+            $consulta = deleteDB(array('table' => 'entrades', 'where' => array('id' => $data['entryId'])));
+            $response = $consulta 
+            ? array('actionSuccess' => 'Entrada eliminada satisfactoriament!')
+            : array('actionFailed' => 'ERROR: No s\'ha pogut eliminar l\'entrada.');
             break;
 
         case 'registerUser':
@@ -184,6 +214,30 @@ if (!empty($validatedData['errors'])) {
                 
                 $response = array('actionSuccess' => 'Dades actualitzades exitosament!');
             }
+            break;
+
+        case 'contactMsg':
+
+            $headers = "MIME-Version: 1.0" . "\r\n";
+            $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+
+            $email = '
+            <html>
+                <h1>Nou missatge del blog!</h1>
+                <p>
+            ';
+
+            $email .= "Remitent: ".$data['contactEmail']."<br>
+                        Nom: ".$data['contactName']."<br><br>
+                        Missatge: <br>".$data['contactMessage']."</p></html>";
+            
+            $result = mail('david@localhost', "Nou missatge des del blog!", wordwrap($email,70), $headers);
+
+            $response = $result 
+                    ? array('actionSuccess' => 'Missatge enviat correctament!')
+                    : array('actionFailed' => 'ERROR: No s\'ha pogut enviar el missatge.');
+
+            $_SESSION['refill'] = array();
             break;
     }
     
