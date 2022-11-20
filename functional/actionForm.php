@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 //# COMPROVACIONS GENERALS #//
 
-//If accessed directly, redirect.
+//Si s'accedeix directament al fitxer, redirigir.
 $pageRequired = explode('/',$_SERVER['SCRIPT_NAME']);
 if (end($pageRequired) == basename(__FILE__)) {
 header("Location: ../index.php");
@@ -15,7 +15,7 @@ if (!isset($_SESSION)) {
 session_start();
 }   
 
-//Definir les accions que pot fer aquest fitxer i l'acció a realitzar:
+//Definir les accions que pot fer aquest fitxer i la pàgina a redireccionar:
 //$actions = ('actionName','Redirect Page').
 $actions = [
     'newCategory' => '../categories.php?action=create', 
@@ -29,12 +29,15 @@ $actions = [
     'updateUserData' => '../userpage.php',
     'contactMsg' => '../contact.php'
 ];
-$action = array_intersect(array_keys($_POST), array_keys($actions));
+
 
 //Comprovar si hi ha una acció vàlida a realitzar pel POST.
 if (!isset($_POST)) {
 header("Location: ../index.php");
 }else{
+    //Extreure del POST l'acció a realitzar i comprovar que es vàlida.
+    $action = array_intersect(array_keys($_POST), array_keys($actions));
+    
     if (empty($action)) {
         header("Location: ../index.php");
     }else{
@@ -50,18 +53,32 @@ require_once '../includes/functions.php';
 unset($_POST[$action]);
 $validatedData = validateData($_POST, $action);
 
-//Volcar errors i refills:
+//Volcar errors i refills a la variable de sessió:
 $_SESSION['errors'] = $validatedData['errors'];
 $_SESSION['refill'] = $validatedData['refill'];
+
+//Variable que guarda les dades que han estat validades correctament.
 $data = $validatedData['data'];
 
+//Afegir la ID a l'enllaç abans de redirigir:
+if (in_array($action, array('editEntry', 'editCategory'))) {
+    switch ($action) {
+        case 'editEntry':
+            $actions['editEntry'] .= '&id='.$data['entryId'];
+            break;
+
+        case 'editCategory':
+            $actions['editCategory'] .= '&id='.$data['catId'];
+            break;
+    }
+}
 
 if (!empty($validatedData['errors'])) {
-    //Si hi ha errors, redirigir des d'on ha vingut.
+    //Si hi ha errors, redirigir a la pàgina que correspón.
     header("Location: ".$actions[$action]);
 }else{
-    //Si no hi ha errors, realitzar l'acció:
 
+    //Si no hi ha errors, realitzar l'acció corresponent:
     switch ($action) {
 
         case 'newCategory':
@@ -81,12 +98,13 @@ if (!empty($validatedData['errors'])) {
             break;
         
         case 'editCategory':
-            $actions['editCategory'] .= '&id='.$data['catId'];
             //Comprovar si existeix la categoria:
             if (categoryExists($data['categoryName'])) {
                 $response = array('actionFailed' => 'Ja existeix una categoria amb aquest nom!');
             }else{
                 $consulta = updateDB(array('table'=>'categories', 'fields'=>array('nombre' => $data['categoryName']), 'where'=>array('id' => $data['catId'])));
+                
+                //Genera el missatge de resposta a l'usuari.
                 $response = $consulta 
                 ? array('actionSuccess' => 'Categoria editada satisfactoriament!')
                 : array('actionFailed' => 'ERROR: No s\'ha pogut editar la categoria.');
@@ -95,15 +113,17 @@ if (!empty($validatedData['errors'])) {
             break;
         
         case 'deleteCategory':
+            //Comprovem si la categoria conté entrades.
             if (sizeof(getEntries(category : $data['categoryId'])) != 0){
                 $response = array('actionFailed' => 'ERROR: No es pot borrar la categoria perquè encara hi han entrades!');
             }else{
                 $consulta = deleteDB(array('table' => 'categories', 'where' => array('id' => $data['categoryId'])));
+                
+                //Genera el missatge de resposta a l'usuari.
                 $response = $consulta 
                 ? array('actionSuccess' => 'Categoria eliminada satisfactoriament!')
                 : array('actionFailed' => 'ERROR: No s\'ha pogut eliminar la categoria.');
             }
-            
             break;
         
         case 'newEntry':
@@ -117,37 +137,40 @@ if (!empty($validatedData['errors'])) {
                 'data' => date("Y-m-d")
                 )
             ));
-            $_SESSION['refill'] = array();
-            
-            $response = $consulta 
-            ? array('actionSuccess' => 'Entrada creada exitosament!')
-            : array('actionFailed' => 'ERROR: No s\'ha pogut crear l\'entrada.');
+
+            if ($consulta) {
+                //Si s'ha pogut crear l'entrada correctament, no reemplenar res.
+                $_SESSION['refill'] = array();
+                $response = array('actionSuccess' => 'Entrada creada exitosament!');
+            }else{
+                array('actionFailed' => 'ERROR: No s\'ha pogut crear l\'entrada.');
+            }
             break;
         
         case 'editEntry':
-            $actions['editEntry'] .= '&id='.$data['entryId'];
             $consulta = updateDB(array('table'=>'entrades', 'fields'=>array(
                 'titol' => $data['entryName'],
                 'descripcio' => $data['entryDescription'],
                 'categoria_id' => $data['entryCat']),
                  'where'=>array('id' => $data['entryId'])));
+
+            //Genera el missatge de resposta a l'usuari.
             $response = $consulta 
             ? array('actionSuccess' => 'Entrada editada satisfactoriament!')
             : array('actionFailed' => 'ERROR: No s\'ha pogut editar la entrada.');
             break;
 
         case 'deleteEntry':
+            //Eliminem directament l'entrada.
             $consulta = deleteDB(array('table' => 'entrades', 'where' => array('id' => $data['entryId'])));
+
+            //Genera el missatge de resposta a l'usuari.
             $response = $consulta 
             ? array('actionSuccess' => 'Entrada eliminada satisfactoriament!')
             : array('actionFailed' => 'ERROR: No s\'ha pogut eliminar l\'entrada.');
             break;
 
         case 'registerUser':
-
-            //Si l'usuri es pot registrar, eliminar les dades a emplenar del formulari:
-            unset($_SESSION['refill']);
-
             //Comprovar si l'usuari existeix o no.
             if (userExists($data['email'])) {
                 $response = array('actionFailed' => 'ERROR: Aquest usuari ja existeix!');
@@ -167,10 +190,15 @@ if (!empty($validatedData['errors'])) {
                         )
                     );
                 
+                if ($consulta) {
+                    //Si l'usuri s'ha pogut registrar, eliminar les dades a emplenar del formulari:
+                    unset($_SESSION['refill']);
+                }
+
+                //Genera el missatge de resposta a l'usuari.
                 $response = $consulta 
                     ? array('actionSuccess' => 'Usuari registrat correctament!')
                     : array('actionFailed' => 'ERROR: No s\'ha pogut registrar l\'usuari.');
-
             }
             break;
 
@@ -179,6 +207,7 @@ if (!empty($validatedData['errors'])) {
             $userEmail = $data['loginEmail'];
             $usuari = selectDB(array('table' => 'usuaris', 'fields' => array('email' => $userEmail, '...')));
 
+            //Si l'usuari existeix:
             if (!empty($usuari)) {
                 //Check passwd:
                 if (password_verify($data['loginPasswd'], $usuari['password'])) {
@@ -199,7 +228,9 @@ if (!empty($validatedData['errors'])) {
 
         case 'updateUserData':
             //Compovar si ja existeix un usuri amb el mateix correu:
-            if (getUserData()['id'] != getUserData($data['email'])['id']) {
+            $usuariDB = getUserData($data['email'])['id'];
+
+            if (!empty($usuariDB) && (getUserData()['id'] != $usuariDB)) {
                 $response = array('actionFailed' => 'Ja hi ha un usuari registrat amb aquest correu!');
             }else{
                 //Actualitzar a la BBDD:
@@ -212,15 +243,17 @@ if (!empty($validatedData['errors'])) {
                 unset($userData['password']);
                 $_SESSION['userData'] = $userData;
                 
+                //Genera el missatge de resposta a l'usuari.
                 $response = array('actionSuccess' => 'Dades actualitzades exitosament!');
             }
             break;
 
         case 'contactMsg':
-
+            //Muntar les capçaleres del correu a enviar al administrador.
             $headers = "MIME-Version: 1.0" . "\r\n";
             $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
 
+            //Muntar el cos del missatge.
             $email = '
             <html>
                 <h1>Nou missatge del blog!</h1>
@@ -231,18 +264,25 @@ if (!empty($validatedData['errors'])) {
                         Nom: ".$data['contactName']."<br><br>
                         Missatge: <br>".$data['contactMessage']."</p></html>";
             
-            $result = mail('david@localhost', "Nou missatge des del blog!", wordwrap($email,70), $headers);
+            //Enviar el correu a l'administrador.            
+            $result = mail(ADMIN_EMAIL, "Nou missatge des del blog!", wordwrap($email,70), $headers);
 
+            //Si s'ha enviat correctament, no reemplenar cap camp.
+            if ($result) {
+                $_SESSION['refill'] = array();
+            }
+
+            //Genera el missatge de resposta a l'usuari.
             $response = $result 
                     ? array('actionSuccess' => 'Missatge enviat correctament!')
                     : array('actionFailed' => 'ERROR: No s\'ha pogut enviar el missatge.');
-
-            $_SESSION['refill'] = array();
             break;
     }
     
-
+    //Carregar a la variable de sessió els errors.
     $_SESSION['errors'] = array($action => $response);
+
+    //Redirigir l'usuari a la pàgina de destí.
     header("Location: ".$actions[$action]);
     }
 

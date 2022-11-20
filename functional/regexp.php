@@ -2,7 +2,7 @@
 // Fitxer que conté el diccionari de funcions per validar cadenes.
 declare(strict_types=1);
 
-//If accessed directly, redirect.
+//Si s'accedeix directament al fitxer, redirigir.
 $pageRequired = explode('/',$_SERVER['SCRIPT_NAME']);
 if (end($pageRequired) == basename(__FILE__)) {
 header("Location: ../index.php");
@@ -48,7 +48,7 @@ $regExp['deleteCategory'] = [
 
 $regExp['newEntry'] = [
     'entryName' => function($v){
-        return preg_match("/^[a-zA-Z0-9 ]*$/",$v) && !empty($v);},
+        return preg_match("/^[a-zA-Z0-9\.\!\,\:\' ]*$/",$v) && !empty($v);},
     'entryDescription' => function($v){
         return !empty($v);},
     'entryCat' => function($v){
@@ -57,7 +57,7 @@ $regExp['newEntry'] = [
 
 $regExp['editEntry'] = [
     'entryName' => function($v){
-        return preg_match("/^[a-zA-Z0-9 ]*$/",$v) && !empty($v);},
+        return preg_match("/^[a-zA-Z0-9\.\!\,\:\' ]*$/",$v) && !empty($v);},
     'entryDescription' => function($v){
         return !empty($v);},
     'entryCat' => function($v){

@@ -2,7 +2,7 @@
 // Document que conté el codi que genera la sidebar.
 declare(strict_types=1);
 
-//If accessed directly, redirect.
+//Si s'accedeix directament al fitxer, redirigir.
 $pageRequired = explode('/',$_SERVER['SCRIPT_NAME']);
 if (end($pageRequired) == basename(__FILE__)) {
 header("Location: ../index.php");

@@ -1,5 +1,5 @@
 <?php
-// Home Page del blog.
+// Landing page de "Sobre nosaltres" del blog.
 declare(strict_types=1);
 
 $pageName = "Sobre nosaltres";
@@ -9,7 +9,7 @@ include_once 'includes/header.php';
 
 ?>
 <div class="main-content col-md-8 col-lg-9 col-xl-10 p-4">
-    <div class="container mt-4">
+    <div class="container-fluid mt-4">
         <h2>Sobre nosaltres:</h2>
         <div class="row">
             <div class="col-12 mt-2 mx-3">

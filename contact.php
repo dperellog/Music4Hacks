@@ -1,23 +1,27 @@
 <?php
-// Home Page del blog.
+// Landing page del formulari de contacte del blog.
 declare(strict_types=1);
 
+if (!isset($_SESSION)) {
+    session_start();
+}
 
+//Codi de capçalera:
 $pageName = "Contacte amb nosaltres";
 
-include_once 'includes/header.php';
-
-//Download errors:
+//Tractament dels resultats de la validació:
 $errors = $_SESSION['errors'] ?? array();
 $refill = $_SESSION['refill'] ?? array();
 
 unset($_SESSION['errors']);
 unset($_SESSION['refill']);
 
+//Codi per generar la pàgina.
+include_once 'includes/header.php';
 
 ?>
     <div class="main-content col-md-8 col-lg-9 col-xl-10 p-4">
-        <div class="container mt-4">
+        <div class="container-fluid mt-4">
             <h2>Contacta amb nosaltres:</h2>
             <div class="row">
                 <div class="col mt-2 mx-3">
@@ -46,7 +50,6 @@ unset($_SESSION['refill']);
         </div>
 
     </div>
-    <?php include 'includes/sidebar.php' ?>
+    <?php include 'includes/sidebar.php';
 
-<?php
 include_once 'includes/footer.php';

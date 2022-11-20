@@ -1,11 +1,12 @@
 <?php
 
-//If accessed directly, redirect.
+//Si s'accedeix directament al fitxer, redirigir.
 $pageRequired = explode('/',$_SERVER['SCRIPT_NAME']);
 if (end($pageRequired) == basename(__FILE__)) {
 header("Location: ../index.php");
 }
 
+//Dades per accedir a la BBDD:
 $servername = "localhost";
 $username = "blog";
 $password = "rLgIFGlfhxUuLxLX";
@@ -22,4 +23,3 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
   die("Connection failed: " . $conn->connect_error);
 }
-?>

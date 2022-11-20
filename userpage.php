@@ -2,12 +2,14 @@
 // Fitxer per carregar la pagina dels usuaris.
 declare(strict_types=1);
 
+//Al treballar amb formularis, iniciem sessió.
 if (!isset($_SESSION)) {
     session_start();
 }
 
 include_once 'includes/functions.php';
 
+//Requerim tenir la sessió iniciada dins la web per carregar la pàgina.
 if (!isLogged()) {
     header("Location: index.php");
 }
@@ -16,13 +18,14 @@ if (!isLogged()) {
 $pageName = 'Editar dades personals';
 
 
-//Download errors:
+//Tractament dels resultats de la validació:
 $errors = $_SESSION['errors'] ?? array();
 $refill = $_SESSION['refill'] ?? array();
 
 unset($_SESSION['errors']);
 unset($_SESSION['refill']);
 
+//Obtenir les dades de l'usuari.
 $userData = getUserData();
 
 include_once 'includes/header.php';
@@ -38,7 +41,7 @@ include_once 'includes/header.php';
         <?= isset($errors['updateUserData']) ? getErrorsAlert($errors['updateUserData']) : null ?>
 
         <div class="row">
-            <div class="col-sm content-box">
+            <div class="col-sm content-box mb-4">
                 <form action="functional/actionForm.php" method="post" class="content">
                     <div class="mb-2">
                         <label for="name" class="form-label">Nom:</label>
@@ -64,9 +67,5 @@ include_once 'includes/header.php';
     </div>
 
 </div>
-<?php include 'includes/sidebar.php' ?>
-
-
-
-<?
+<?php include 'includes/sidebar.php';
 include_once 'includes/footer.php';

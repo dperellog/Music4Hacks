@@ -2,19 +2,19 @@
 // Fitxer que conté la capalera del blog.
 declare(strict_types=1);
 
-//If accessed directly, redirect.
+//Si s'accedeix directament al fitxer, redirigir.
 $pageRequired = explode('/',$_SERVER['SCRIPT_NAME']);
 if (end($pageRequired) == basename(__FILE__)) {
 header("Location: ../index.php");
 }
 
-$pageName = $pageName ?? 'Music4Hacks';
-
-require_once 'functions.php';
-
 if (!isset($_SESSION)) {
     session_start();
 }
+
+$pageName = $pageName ?? 'Music4Hacks';
+
+require_once 'functions.php';
 ?>
 <!DOCTYPE html>
 <html lang="ca-ES">
